@@ -12,6 +12,7 @@
         .products-container { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
         .form-container { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
         .form-container input, .form-container textarea, .form-container button { display: block; width: 90%; margin: 10px auto; padding: 10px; }
+        .delete-btn { background-color: red; color: white; padding: 5px; cursor: pointer; border: none; }
         #loginForm { display: none; padding: 20px; background: white; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; }
     </style>
 </head>
@@ -31,32 +32,34 @@
 
     <div id="products-italiano" class="products-container">
         <h2>Productos - Restaurante Italiano</h2>
-        <p>Producto 1 - Descripción breve</p>
-        <p>Producto 2 - Descripción breve</p>
+        <ul id="list-italiano">
+            <li>Producto 1 - Descripción breve <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button></li>
+            <li>Producto 2 - Descripción breve <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button></li>
+        </ul>
     </div>
 
     <div id="products-mexicano" class="products-container">
         <h2>Productos - Restaurante Mexicano</h2>
-        <p>Producto A - Descripción breve</p>
-        <p>Producto B - Descripción breve</p>
+        <ul id="list-mexicano">
+            <li>Producto A - Descripción breve <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button></li>
+            <li>Producto B - Descripción breve <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button></li>
+        </ul>
     </div>
 
     <div id="form-italiano" class="form-container">
         <h2>Agregar Producto - Restaurante Italiano</h2>
-        <input type="text" placeholder="Nombre del Producto">
-        <textarea placeholder="Descripción"></textarea>
-        <input type="file" accept="image/*">
-        <input type="number" placeholder="Precio">
-        <button>Agregar Producto</button>
+        <input type="text" id="name-italiano" placeholder="Nombre del Producto">
+        <textarea id="desc-italiano" placeholder="Descripción"></textarea>
+        <input type="number" id="price-italiano" placeholder="Precio">
+        <button onclick="addProduct('italiano')">Agregar Producto</button>
     </div>
 
     <div id="form-mexicano" class="form-container">
         <h2>Agregar Producto - Restaurante Mexicano</h2>
-        <input type="text" placeholder="Nombre del Producto">
-        <textarea placeholder="Descripción"></textarea>
-        <input type="file" accept="image/*">
-        <input type="number" placeholder="Precio">
-        <button>Agregar Producto</button>
+        <input type="text" id="name-mexicano" placeholder="Nombre del Producto">
+        <textarea id="desc-mexicano" placeholder="Descripción"></textarea>
+        <input type="number" id="price-mexicano" placeholder="Precio">
+        <button onclick="addProduct('mexicano')">Agregar Producto</button>
     </div>
 
     <script>
@@ -83,6 +86,29 @@
         function showProducts(restaurant) {
             document.querySelectorAll('.products-container').forEach(container => container.style.display = 'none');
             document.getElementById(`products-${restaurant}`).style.display = 'block';
+        }
+
+        function addProduct(restaurant) {
+            const name = document.getElementById(`name-${restaurant}`).value;
+            const desc = document.getElementById(`desc-${restaurant}`).value;
+            const price = document.getElementById(`price-${restaurant}`).value;
+
+            if (name && desc && price) {
+                const ul = document.getElementById(`list-${restaurant}`);
+                const li = document.createElement('li');
+                li.innerHTML = `${name} - ${desc} - $${price} <button class="delete-btn" onclick="deleteProduct(this)">Eliminar</button>`;
+                ul.appendChild(li);
+
+                document.getElementById(`name-${restaurant}`).value = '';
+                document.getElementById(`desc-${restaurant}`).value = '';
+                document.getElementById(`price-${restaurant}`).value = '';
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        }
+
+        function deleteProduct(button) {
+            button.parentElement.remove();
         }
     </script>
 </body>
