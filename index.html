@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Restaurantes</title>
+    <title>Gestión de Restaurantes</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
-        h1, h2 { text-align: center; margin: 20px; }
-        .restaurant-card { border: 1px solid #ccc; padding: 20px; margin: 10px auto; width: 80%; max-width: 400px; background-color: white; border-radius: 10px; text-align: center; cursor: pointer; }
-        .restaurant-content { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
-        .form-container { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
+        h1, h2 { text-align: center; }
+        .restaurant-card { border: 1px solid #ccc; padding: 20px; margin: 10px auto; width: 80%; max-width: 400px; background: white; border-radius: 10px; text-align: center; cursor: pointer; }
+        .restaurant-content { display: none; padding: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
         .form-container input, .form-container textarea, .form-container button { display: block; width: 90%; margin: 10px auto; padding: 10px; }
         .delete-btn { background-color: red; color: white; padding: 5px; cursor: pointer; border: none; }
-        #loginForm { display: none; padding: 20px; background: white; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; }
+        #loginForm { display: none; padding: 20px; background: white; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #ccc; border-radius: 10px; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -30,36 +29,21 @@
         <button onclick="closeLogin()">Cancelar</button>
     </div>
 
-    <div id="restaurant-italiano" class="restaurant-content">
-        <h2>Restaurante Italiano</h2>
-        <ul id="list-italiano"></ul>
-        <div id="form-italiano" class="form-container">
-            <h3>Agregar Producto</h3>
-            <input type="text" id="name-italiano" placeholder="Nombre del Producto">
-            <textarea id="desc-italiano" placeholder="Descripción"></textarea>
-            <input type="number" id="price-italiano" placeholder="Precio">
-            <input type="file" id="image-italiano" accept="image/*">
-            <button onclick="addProduct('italiano')">Agregar Producto</button>
-        </div>
-        <button onclick="goBack()">Volver</button>
-    </div>
-
-    <div id="restaurant-mexicano" class="restaurant-content">
-        <h2>Restaurante Mexicano</h2>
-        <ul id="list-mexicano"></ul>
-        <div id="form-mexicano" class="form-container">
-            <h3>Agregar Producto</h3>
-            <input type="text" id="name-mexicano" placeholder="Nombre del Producto">
-            <textarea id="desc-mexicano" placeholder="Descripción"></textarea>
-            <input type="number" id="price-mexicano" placeholder="Precio">
-            <input type="file" id="image-mexicano" accept="image/*">
-            <button onclick="addProduct('mexicano')">Agregar Producto</button>
+    <div id="restaurant-content" class="restaurant-content">
+        <h2 id="restaurant-title"></h2>
+        <ul id="product-list"></ul>
+        <div id="form-container" class="form-container">
+            <input type="text" id="product-name" placeholder="Nombre del Producto">
+            <textarea id="product-desc" placeholder="Descripción"></textarea>
+            <input type="number" id="product-price" placeholder="Precio">
+            <button onclick="addProduct()">Agregar Producto</button>
         </div>
         <button onclick="goBack()">Volver</button>
     </div>
 
     <script>
         let currentUser = null;
+        let currentRestaurant = '';
 
         function showLogin() {
             document.getElementById('loginForm').style.display = 'block';
@@ -75,7 +59,7 @@
 
             if ((username === 'italiano' && password === '1234') || (username === 'mexicano' && password === '1234')) {
                 currentUser = username;
-                document.getElementById(`form-${username}`).style.display = 'block';
+                document.getElementById('form-container').style.display = 'block';
                 closeLogin();
                 showRestaurant(username);
             } else {
@@ -84,58 +68,62 @@
         }
 
         function showRestaurant(restaurant) {
-            document.querySelectorAll('.restaurant-content').forEach(content => content.style.display = 'none');
+            currentRestaurant = restaurant;
             document.querySelectorAll('.restaurant-card').forEach(card => card.style.display = 'none');
-            document.querySelector('h1').style.display = 'none';
-            document.getElementById(`restaurant-${restaurant}`).style.display = 'block';
+            document.getElementById('restaurant-title').textContent = `Restaurante ${restaurant.charAt(0).toUpperCase() + restaurant.slice(1)}`;
+            document.getElementById('restaurant-content').style.display = 'block';
+            loadProducts();
         }
 
         function goBack() {
-            document.querySelectorAll('.restaurant-content').forEach(content => content.style.display = 'none');
             document.querySelectorAll('.restaurant-card').forEach(card => card.style.display = 'block');
-            document.querySelector('h1').style.display = 'block';
+            document.getElementById('restaurant-content').style.display = 'none';
         }
 
-        function addProduct(restaurant) {
-            const name = document.getElementById(`name-${restaurant}`).value;
-            const desc = document.getElementById(`desc-${restaurant}`).value;
-            const price = document.getElementById(`price-${restaurant}`).value;
-            const imageFile = document.getElementById(`image-${restaurant}`).files[0];
+        function addProduct() {
+            const name = document.getElementById('product-name').value;
+            const desc = document.getElementById('product-desc').value;
+            const price = document.getElementById('product-price').value;
 
             if (name && desc && price) {
-                const ul = document.getElementById(`list-${restaurant}`);
-                const li = document.createElement('li');
-                li.innerHTML = `<strong>${name}</strong> - ${desc} - $${price}`;
+                fetch(`/api/products/${currentRestaurant}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, desc, price })
+                }).then(() => loadProducts());
 
-                if (imageFile) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.maxWidth = '100px';
-                        img.style.display = 'block';
-                        li.appendChild(img);
-                    };
-                    reader.readAsDataURL(imageFile);
-                }
-
-                if (currentUser === restaurant) {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.textContent = 'Eliminar';
-                    deleteBtn.className = 'delete-btn';
-                    deleteBtn.onclick = function() { li.remove(); };
-                    li.appendChild(deleteBtn);
-                }
-
-                ul.appendChild(li);
-
-                document.getElementById(`name-${restaurant}`).value = '';
-                document.getElementById(`desc-${restaurant}`).value = '';
-                document.getElementById(`price-${restaurant}`).value = '';
-                document.getElementById(`image-${restaurant}`).value = '';
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-desc').value = '';
+                document.getElementById('product-price').value = '';
             } else {
                 alert('Por favor, completa todos los campos.');
             }
+        }
+
+        function loadProducts() {
+            fetch(`/api/products/${currentRestaurant}`)
+                .then(response => response.json())
+                .then(products => {
+                    const ul = document.getElementById('product-list');
+                    ul.innerHTML = '';
+                    products.forEach(product => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `${product.name} - ${product.desc} - $${product.price}`;
+                        if (currentUser === currentRestaurant) {
+                            const btn = document.createElement('button');
+                            btn.textContent = 'Eliminar';
+                            btn.className = 'delete-btn';
+                            btn.onclick = () => deleteProduct(product.name);
+                            li.appendChild(btn);
+                        }
+                        ul.appendChild(li);
+                    });
+                });
+        }
+
+        function deleteProduct(name) {
+            fetch(`/api/products/${currentRestaurant}/${name}`, { method: 'DELETE' })
+                .then(() => loadProducts());
         }
     </script>
 </body>
