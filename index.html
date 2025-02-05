@@ -4,9 +4,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Restaurante</title>
+    <title>Lista de Restaurantes</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+        h1, h2 { text-align: center; margin: 20px; }
+        .restaurant-card { border: 1px solid #ccc; padding: 20px; margin: 10px auto; width: 80%; max-width: 400px; background-color: white; border-radius: 10px; text-align: center; cursor: pointer; }
+        .products-container { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
+        .form-container { display: none; padding: 20px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; margin: 20px; }
+        .form-container input, .form-container textarea, .form-container button { display: block; width: 90%; margin: 10px auto; padding: 10px; }
+        #loginForm { display: none; padding: 20px; background: white; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; }
+    </style>
 </head>
 <body>
-    <h1>Bienvenido a Mi Restaurante</h1>
+    <h1>Lista de Restaurantes</h1>
+    <button onclick="showLogin()">Iniciar Sesión</button>
+    <div class="restaurant-card" onclick="showProducts('italiano')">Restaurante Italiano</div>
+    <div class="restaurant-card" onclick="showProducts('mexicano')">Restaurante Mexicano</div>
+
+    <div id="loginForm">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Entrar</button>
+        <button onclick="closeLogin()">Cancelar</button>
+    </div>
+
+    <div id="products-italiano" class="products-container">
+        <h2>Productos - Restaurante Italiano</h2>
+        <p>Producto 1 - Descripción breve</p>
+        <p>Producto 2 - Descripción breve</p>
+    </div>
+
+    <div id="products-mexicano" class="products-container">
+        <h2>Productos - Restaurante Mexicano</h2>
+        <p>Producto A - Descripción breve</p>
+        <p>Producto B - Descripción breve</p>
+    </div>
+
+    <div id="form-italiano" class="form-container">
+        <h2>Agregar Producto - Restaurante Italiano</h2>
+        <input type="text" placeholder="Nombre del Producto">
+        <textarea placeholder="Descripción"></textarea>
+        <input type="file" accept="image/*">
+        <input type="number" placeholder="Precio">
+        <button>Agregar Producto</button>
+    </div>
+
+    <div id="form-mexicano" class="form-container">
+        <h2>Agregar Producto - Restaurante Mexicano</h2>
+        <input type="text" placeholder="Nombre del Producto">
+        <textarea placeholder="Descripción"></textarea>
+        <input type="file" accept="image/*">
+        <input type="number" placeholder="Precio">
+        <button>Agregar Producto</button>
+    </div>
+
+    <script>
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function closeLogin() {
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if ((username === 'italiano' && password === '1234') || (username === 'mexicano' && password === '1234')) {
+                document.getElementById(`form-${username}`).style.display = 'block';
+                closeLogin();
+            } else {
+                alert('Usuario o contraseña incorrectos');
+            }
+        }
+
+        function showProducts(restaurant) {
+            document.querySelectorAll('.products-container').forEach(container => container.style.display = 'none');
+            document.getElementById(`products-${restaurant}`).style.display = 'block';
+        }
+    </script>
 </body>
 </html>
